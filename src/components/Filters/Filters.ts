@@ -1,5 +1,9 @@
+import { LIST_AUTO } from 'constants/listAuto';
+import { ROOT_FILTERS } from 'constants/root';
+import { Cards } from '../Cards/Cards';
+
 class Filters {
-  render() {
+  render(): void {
     const html = `
     <div class="filter-container">
     <div class="menu-accordion">
@@ -257,7 +261,9 @@ class Filters {
   </div>
     `;
 
-    ROOT_FILTERS.innerHTML = html;
+    if (ROOT_FILTERS) {
+      ROOT_FILTERS.innerHTML = html;
+    }
   }
 }
 
@@ -269,141 +275,121 @@ const contents = document.querySelectorAll('.accordion__content');
 
 titles.forEach((item) =>
   item.addEventListener('click', () => {
-    const activeContent = document.querySelector('#' + item.dataset.tab);
+    const activeContent = document.querySelector<HTMLElement>(
+      '#' + item.getAttribute('data-tab')
+    );
 
-    if (activeContent.classList.contains('active')) {
+    if (activeContent && activeContent.classList.contains('active')) {
       activeContent.classList.remove('active');
       item.classList.remove('active');
-      activeContent.style.maxHeight = 0;
-      item.querySelector('span').innerHTML = '＋';
-      item.style.borderBottom = '1px solid #e8e9e8';
+      activeContent.style.maxHeight = '0';
+      item.querySelector('span')!.innerHTML = '＋';
+      if (item instanceof HTMLElement) {
+        item.style.borderBottom = '1px solid #e8e9e8';
+      }
       activeContent.style.borderBottom = 'none';
     } else {
       item.classList.add('active');
-      activeContent.classList.add('active');
-      activeContent.style.maxHeight = activeContent.scrollHeight + 'px';
-      item.querySelector('span').innerHTML = '－';
-      item.style.borderBottom = 'none';
+      activeContent?.classList.add('active');
+      activeContent?.classList.add('active');
+      if (activeContent) {
+        activeContent.style.maxHeight = activeContent.scrollHeight + 'px';
+      }
+      item.querySelector('span')!.innerHTML = '－';
+      if (item instanceof HTMLElement) {
+        item.style.borderBottom = 'none';
+      }
     }
   })
 );
 
-document.addEventListener("DOMContentLoaded", function () {
-  const priceFromInput = document.getElementById('priceFrom');
-  const priceToInput = document.getElementById('priceTo');
-  const rangeFrom = document.getElementById('priceRangeFrom');
-  const rangeTo = document.getElementById('priceRangeTo');
-  const rangeSliderProgress = document.querySelector('.range-slider__progres');
-
-  function updateRangeSliderProgress() {
-    const min = parseFloat(rangeFrom.value);
-    const max = parseFloat(rangeTo.value);
-    const percentageMin = ((min - parseFloat(rangeFrom.min)) / (parseFloat(rangeFrom.max) - parseFloat(rangeFrom.min))) * 100;
-    const percentageMax = ((max - parseFloat(rangeTo.min)) / (parseFloat(rangeTo.max) - parseFloat(rangeTo.min))) * 100;
-
-    rangeSliderProgress.style.left = `${percentageMin}%`;
-    rangeSliderProgress.style.right = `${100 - percentageMax}%`;
-  }
-
-  function syncFromInput() {
-    let fromValue = parseFloat(priceFromInput.value);
-    let toValue = parseFloat(priceToInput.value);
-    if (fromValue > toValue) {
-      fromValue = toValue;
-      priceFromInput.value = fromValue;
-    }
-    rangeFrom.value = fromValue;
-    updateRangeSliderProgress();
-  }
-
-  function syncToInput() {
-    let fromValue = parseFloat(priceFromInput.value);
-    let toValue = parseFloat(priceToInput.value);
-    if (toValue < fromValue) {
-      toValue = fromValue;
-      priceToInput.value = toValue;
-    }
-    rangeTo.value = toValue;
-    updateRangeSliderProgress();
-  }
-
-  function syncRangeFrom() {
-    let fromValue = parseFloat(rangeFrom.value);
-    let toValue = parseFloat(rangeTo.value);
-    if (fromValue > toValue) {
-      fromValue = toValue;
-      rangeFrom.value = fromValue;
-    }
-    priceFromInput.value = fromValue;
-    updateRangeSliderProgress();
-  }
-
-  function syncRangeTo() {
-    let fromValue = parseFloat(rangeFrom.value);
-    let toValue = parseFloat(rangeTo.value);
-    if (toValue < fromValue) {
-      toValue = fromValue;
-      rangeTo.value = toValue;
-    }
-    priceToInput.value = toValue;
-    updateRangeSliderProgress();
-  }
-
-  priceFromInput.addEventListener('input', syncFromInput);
-  priceToInput.addEventListener('input', syncToInput);
-  rangeFrom.addEventListener('input', syncRangeFrom);
-  rangeTo.addEventListener('input', syncRangeTo);
-
-  updateRangeSliderProgress();
-});
-
-function applyFilters() {
-  const priceFrom = document.getElementById('priceFrom').value;
-  const priceTo = document.getElementById('priceTo').value;
-  const selectedType = document.getElementById('type').value;
-  const selectedManufacturers = Array.from(
-    document.querySelectorAll(
+export function applyFilters(): void {
+  const priceFromElement = document.getElementById('priceFrom');
+  const priceToElement = document.getElementById('priceTo');
+  const selectedTypeElement = document.getElementById('type');
+  const selectedManufacturersElements =
+    document.querySelectorAll<HTMLInputElement>(
       'input[type="checkbox"][name="manufacturer"]:checked'
-    )
-  ).map((input) => input.value);
-  const country = document.getElementById('country').value;
-  const selectedTransmission = Array.from(
-    document.querySelectorAll(
+    );
+  const countryElement = document.getElementById('country');
+  const selectedTransmissionElements =
+    document.querySelectorAll<HTMLInputElement>(
       'input[type="checkbox"][name="transmission"]:checked'
-    )
-  ).map((input) => input.value);
-  const selectedAdTypes = Array.from(
-    document.querySelectorAll('input[type="checkbox"][name="adType"]:checked')
-  ).map((input) => input.value);
+    );
+  const selectedAdTypesElements = document.querySelectorAll<HTMLInputElement>(
+    'input[type="checkbox"][name="adType"]:checked'
+  );
+
+  if (
+    !priceFromElement ||
+    !priceToElement ||
+    !selectedTypeElement ||
+    !selectedManufacturersElements ||
+    !countryElement ||
+    !selectedTransmissionElements ||
+    !selectedAdTypesElements
+  ) {
+    throw new Error('Не найден один или более обязательный элемент');
+    return;
+  }
+
+  const priceFrom =
+    priceFromElement instanceof HTMLInputElement ? priceFromElement.value : '';
+  const priceTo =
+    priceToElement instanceof HTMLInputElement ? priceToElement.value : '';
+  const selectedType =
+    selectedTypeElement instanceof HTMLSelectElement
+      ? selectedTypeElement.value
+      : '';
+  const selectedManufacturers = Array.prototype.map.call(
+    selectedManufacturersElements || [],
+    (input) => input.value
+  );
+  const country =
+    countryElement instanceof HTMLInputElement ? countryElement.value : '';
+  const selectedTransmission = Array.prototype.map.call(
+    selectedTransmissionElements || [],
+    (input) => input.value
+  );
+  const selectedAdTypes = Array.prototype.map.call(
+    selectedAdTypesElements || [],
+    (input) => input.value
+  );
 
   const filteredCards = LIST_AUTO.filter((card) => {
-    let passPriceFilter = true;
+    let passPriceFilter: boolean = true;
     if (priceFrom && priceTo) {
       passPriceFilter =
         card.price >= parseInt(priceFrom) && card.price <= parseInt(priceTo);
     }
 
-    const passTypeFilter =
+    const passTypeFilter: boolean =
       !selectedType ||
       card.classType.toLowerCase() === selectedType.toLowerCase();
 
-    const passManufacturerFilter =
+    const passManufacturerFilter: boolean =
       selectedManufacturers.length === 0 ||
-      selectedManufacturers.some((manufacturer) =>
-        card.manufacturer.toLowerCase().includes(manufacturer)
-      );
+      selectedManufacturers.some((manufacturer) => {
+        if (typeof manufacturer !== 'string') return false;
+        if (!card.manufacturer) return false;
+        return (
+          card.manufacturer
+            .toLowerCase()
+            .indexOf(manufacturer.toLowerCase()) !== -1
+        );
+      });
 
-    const passCountryFilter =
+    const passCountryFilter: boolean =
       !country ||
       (card.country && card.country.toLowerCase() === country.toLowerCase());
 
-    const passTransmissionFilter =
+    const passTransmissionFilter: boolean =
       selectedTransmission.length === 0 ||
-      selectedTransmission.includes(card.transmissionType.toLowerCase());
+      selectedTransmission.indexOf(card.transmissionType.toLowerCase()) !== -1;
 
-    const passAdTypeFilter =
+    const passAdTypeFilter: boolean =
       selectedAdTypes.length === 0 ||
-      selectedAdTypes.includes(card.adType.toLowerCase());
+      selectedAdTypes.indexOf(card.adType.toLowerCase()) !== -1;
 
     return (
       passPriceFilter &&
@@ -418,24 +404,3 @@ function applyFilters() {
   const cards = new Cards();
   cards.render(filteredCards);
 }
-
-
-// function initializeRangeSlider() {
-//   const range = document.querySelectorAll('.range-slider input');
-//   const progress = document.querySelector('.range-slider__progres');
-//   const inputValue = document.querySelectorAll('.price-filter-price__label input');
-
-//   range.forEach((input) => {
-//     input.addEventListener('input', () => {
-//       let minrange = parseInt(range[0].value);
-//       let maxrange = parseInt(range[1].value);
-
-//       progress.style.left = (minrange / input.getAttribute('max')) * 1000 + '%';
-//       progress.style.right = (1 - maxrange / input.getAttribute('max')) * 1000 + '%';
-
-//       inputValue[0].value = minrange;
-//       inputValue[1].value = maxrange;
-//     });
-//   });
-// }
-// initializeRangeSlider();
