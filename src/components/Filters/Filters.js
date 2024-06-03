@@ -1,5 +1,5 @@
-import { LIST_AUTO } from 'constants/listAuto';
-import { ROOT_FILTERS } from 'constants/root';
+import { LIST_AUTO } from '../../constants/listAuto';
+import { ROOT_FILTERS } from '../../constants/root';
 import { Cards } from '../Cards/Cards';
 class Filters {
     render() {

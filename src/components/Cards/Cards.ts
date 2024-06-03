@@ -1,5 +1,5 @@
-import { Car, LIST_AUTO } from 'constants/listAuto';
-import { ROOT_CARDS } from 'constants/root';
+import { Car, LIST_AUTO } from '../../constants/listAuto';
+import { ROOT_CARDS } from '../../constants/root';
 import { applyFilters } from '../Filters/Filters';
 
 export class Cards {
@@ -9,7 +9,7 @@ export class Cards {
     const cardsData =
       filteredCards && filteredCards.length ? filteredCards : LIST_AUTO;
 
-    cardsData.forEach(
+    cardsData.map(
       (
         {
           id,
@@ -85,15 +85,17 @@ export class Cards {
     }
   }
 
-  updateShowMoreButton() {
-    const cardsElements =
-      document.querySelectorAll<HTMLElement>('.cards-element');
-    const hiddenCards = Array.prototype.filter.call(
-      cardsElements,
-      (card) => card.style.display === 'none'
-    );
+  updateShowMoreButton(): void {
+    const cardsElements: NodeListOf<HTMLElement> =
+    document.querySelectorAll<HTMLElement>('.cards-element');
+    const hiddenCards: HTMLElement[] = [];
+    cardsElements.forEach((card) => {
+      if (card.style.display === 'none') {
+        hiddenCards.push(card);
+      }
+    });
     const showMoreButton = document.getElementById('btn-show');
-
+  
     if (showMoreButton) {
       showMoreButton.style.display =
         hiddenCards.length === 0 ? 'none' : 'block';
@@ -110,11 +112,14 @@ function clearСurrentFilter(number: number): void {
 
 function showMoreClick(): void {
   const cardsElements =
-    document.querySelectorAll<HTMLElement>('.cards-element');
-  const hiddenCards = Array.prototype.filter.call(
-    cardsElements,
-    (card) => card.style.display === 'none'
-  );
+  document.querySelectorAll<HTMLElement>('.cards-element');
+  const hiddenCards: HTMLElement[] = [];
+
+  cardsElements.forEach((card) => {
+    if (card.style.display === 'none') {
+      hiddenCards.push(card);
+    }
+  });
 
   if (hiddenCards.length > 0) {
     hiddenCards.slice(0, 2).forEach((card) => {
@@ -126,16 +131,19 @@ function showMoreClick(): void {
 }
 
 function clearAllFilters() {
+  function isHTMLInputElement(element: HTMLElement): element is HTMLInputElement {
+    return 'value' in element;
+  }
   const priceFrom = document.getElementById('priceFrom');
-  if (priceFrom instanceof HTMLInputElement) {
+  if (priceFrom && isHTMLInputElement(priceFrom)) {
     priceFrom.value = '';
   }
   const priceTo = document.getElementById('priceTo');
-  if (priceTo instanceof HTMLInputElement) {
+  if (priceTo && isHTMLInputElement(priceTo)) {
     priceTo.value = '';
   }
   const type = document.getElementById('type');
-  if (type instanceof HTMLInputElement) {
+  if (type && isHTMLInputElement(type)) {
     type.value = '';
   }
   const manufacturersCheckboxes = document.querySelectorAll<HTMLInputElement>(
@@ -145,7 +153,7 @@ function clearAllFilters() {
     checkbox.checked = false;
   });
   const country = document.getElementById('country');
-  if (country instanceof HTMLInputElement) {
+  if (country && isHTMLInputElement(country)) {
     country.value = '';
   }
   const transmissionCheckboxes = document.querySelectorAll<HTMLInputElement>(
@@ -162,13 +170,13 @@ function clearAllFilters() {
   });
   applyFilters();
   const selFlt = document.getElementById('sel-flt');
-  if (selFlt instanceof HTMLElement) {
-    selFlt.style.display = 'none';
+  if (selFlt && isHTMLInputElement(selFlt)) {
+    selFlt.value = '';
   }
   const inputContainer = document.getElementsByClassName(
     'selected-filters__input-container'
   );
-  Array.prototype.forEach.call(inputContainer, (container) => {
+[...inputContainer].forEach((container) => {
     if (container instanceof HTMLElement) {
       container.style.display = 'none';
     }

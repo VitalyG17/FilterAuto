@@ -1,12 +1,12 @@
-import { LIST_AUTO } from 'constants/listAuto';
-import { ROOT_CARDS } from 'constants/root';
+import { LIST_AUTO } from '../../constants/listAuto';
+import { ROOT_CARDS } from '../../constants/root';
 import { applyFilters } from '../Filters/Filters';
 export class Cards {
     render(filteredCards) {
         let htmlListAuto = '';
         const imgLocation = 'img/carbon_location.png';
         const cardsData = filteredCards && filteredCards.length ? filteredCards : LIST_AUTO;
-        cardsData.forEach(({ id, img, type, name, yearProd, weight, mileage, location, price, transmissionType, }, index) => {
+        cardsData.map(({ id, img, type, name, yearProd, weight, mileage, location, price, transmissionType, }, index) => {
             const displayStyle = index >= 4 ? 'none' : '';
             const transmissionDisplay = transmissionType === 'automatic' ? 'АКПП' : 'МКПП';
             htmlListAuto += `
@@ -65,7 +65,12 @@ export class Cards {
     }
     updateShowMoreButton() {
         const cardsElements = document.querySelectorAll('.cards-element');
-        const hiddenCards = Array.prototype.filter.call(cardsElements, (card) => card.style.display === 'none');
+        const hiddenCards = [];
+        cardsElements.forEach((card) => {
+            if (card.style.display === 'none') {
+                hiddenCards.push(card);
+            }
+        });
         const showMoreButton = document.getElementById('btn-show');
         if (showMoreButton) {
             showMoreButton.style.display =
@@ -81,7 +86,12 @@ function clearСurrentFilter(number) {
 }
 function showMoreClick() {
     const cardsElements = document.querySelectorAll('.cards-element');
-    const hiddenCards = Array.prototype.filter.call(cardsElements, (card) => card.style.display === 'none');
+    const hiddenCards = [];
+    cardsElements.forEach((card) => {
+        if (card.style.display === 'none') {
+            hiddenCards.push(card);
+        }
+    });
     if (hiddenCards.length > 0) {
         hiddenCards.slice(0, 2).forEach((card) => {
             card.style.display = '';
@@ -90,16 +100,19 @@ function showMoreClick() {
     cards.updateShowMoreButton();
 }
 function clearAllFilters() {
+    function isHTMLInputElement(element) {
+        return 'value' in element;
+    }
     const priceFrom = document.getElementById('priceFrom');
-    if (priceFrom instanceof HTMLInputElement) {
+    if (priceFrom && isHTMLInputElement(priceFrom)) {
         priceFrom.value = '';
     }
     const priceTo = document.getElementById('priceTo');
-    if (priceTo instanceof HTMLInputElement) {
+    if (priceTo && isHTMLInputElement(priceTo)) {
         priceTo.value = '';
     }
     const type = document.getElementById('type');
-    if (type instanceof HTMLInputElement) {
+    if (type && isHTMLInputElement(type)) {
         type.value = '';
     }
     const manufacturersCheckboxes = document.querySelectorAll('input[type="checkbox"][name="manufacturer"]:checked');
@@ -107,7 +120,7 @@ function clearAllFilters() {
         checkbox.checked = false;
     });
     const country = document.getElementById('country');
-    if (country instanceof HTMLInputElement) {
+    if (country && isHTMLInputElement(country)) {
         country.value = '';
     }
     const transmissionCheckboxes = document.querySelectorAll('input[type="checkbox"][name="transmission"]:checked');
@@ -120,11 +133,11 @@ function clearAllFilters() {
     });
     applyFilters();
     const selFlt = document.getElementById('sel-flt');
-    if (selFlt instanceof HTMLElement) {
-        selFlt.style.display = 'none';
+    if (selFlt && isHTMLInputElement(selFlt)) {
+        selFlt.value = '';
     }
     const inputContainer = document.getElementsByClassName('selected-filters__input-container');
-    Array.prototype.forEach.call(inputContainer, (container) => {
+    [...inputContainer].forEach((container) => {
         if (container instanceof HTMLElement) {
             container.style.display = 'none';
         }
